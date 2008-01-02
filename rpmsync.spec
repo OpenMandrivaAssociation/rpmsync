@@ -9,6 +9,7 @@ Source1:	README
 Source2:	exclude.lst
 Requires:	rsync
 BuildArch:	noarch
+BuildRoot:	%{_tmppath}/%{name}-buildroot
 
 %description
 - Script to rsync update an RPM repository mirror; most useful for
