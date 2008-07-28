@@ -1,7 +1,7 @@
 Summary:	Script to rsync update an RPM repository mirror
 Name:		rpmsync
 Version:	1.7
-Release:	%mkrel 3
+Release:	%mkrel 5
 License:	LGPL
 Group:		Networking/File transfer
 Source0:	%{name}.pl
