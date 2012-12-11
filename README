@@ -1,0 +1,79 @@
+rpmsync can be used to mirror one version of an RPM-based
+distribution.  The rsync protocol allows only the differences in a
+changed file to be downloaded, rather than an entire copy of a changed
+file.  For RPM files, when they are updated to a new version, the
+filename is changed because the version is in the filename.  rpmsync
+can rename an RPM file to the new version's filename before running
+rsync, to allow the efficiencies of rsync to work between different
+versions of an RPM package.
+
+rpmsync is most useful for mirroring RPM repositories that are
+frequently updated.  Good exmaples are Mandriva Cooker, RedHat
+Rawhide, and security updates for an RPM-based distribution.
+
+One run of rpmsync should only be used for one version of one
+distribution.  One version of a distro's security updates counts as a
+different distribution.  So for example, mirroring security updates
+for two different versions of Mandriva Linux would require you to run
+rpmsync twice, once for each version.
+
+rpmsync can be configured by changing the default values in the top of
+the script itself, or by using command-line arguments.  Command line
+arguments are the same as rsync's where appropriate, so if you are
+familiar with rsync, you can use rpmsync as a drop-in replacement.
+Command-line arguments used by rsync but not rpmsync will be ignored,
+although warnings will be spit out to your console.  Also, for this to
+work totally reliably, you need to version 2.33_02 or newer of Perl's
+Getopt::Long module.
+
+The reason rpmsync supports multiple source arguments, is because
+sometimes one distribution is split into multiple directories on a
+mirror, such as contrib and main for Mandriva.
+
+Usage:
+rpmsync [OPTIONS] [rsync://[RSYNCHOST]/[SRC] [LOCALPATH]]
+or:
+rpmsync [OPTIONS] --source=SRC [rsync://[RSYNCHOST]/[RSYNCPATH] [LOCALPATH]]
+
+RSYNCHOST is the hostname of the rsync server you're using
+The part of the path that all of your sources have in common (at the
+beginning) is the RSYNCPATH.  You can determine this by browsing an
+rsync server like this:
+rsync rsync://[RSYNCHOST/
+
+which will give you a directory listing.  When you pick a directory,
+then run the same command, appending the path, and making sure to put
+the trailing slash after the directory name.  Keep browsing until you
+determine the RSYNCPATH.  Make sure to *not* have a trailing slash on
+the RSYNCPATH when you call rpmsync.  The directory structure of your
+sources under that path will be the same locally, and stored under
+LOCALPATH.  If you have only one source, you can use the first form of
+rpmsync usage, and the RSYNCPATH and SOURCES will be figured out
+automatically.
+
+An example for mirroring Mandriva Cooker i586 and x86_64 in one call:
+rpmsync -vz --source=i586 --source=x86_64 rsync://ftp.uninett.no/Mandrivalinux/devel/cooker /pub/linux/Mandrivalinux/devel/cooker
+
+An example for mirroring the security updates for Mandriva Linux 2007.0:
+rpmsync -vz rsync://ftp.uninett.no/Mandrivalinux/stable/updates/2007.0 /pub/linux/Mandrivalinux/stable/updates
+
+If you also wanted to mirror the updates for 2006.0, you would have to do
+a seperate run of rpmsync.
+
+The --include-from and --exclude-from arguments allow you to use files
+with patterns to match against filenames to limit what files within
+your sources you actually mirror.  By default all files within the
+sources are downloaded.  You can use exclude patterns to exclude
+certain files, and you can use include to make sure you don't exclude
+a subset of the files that matched your exclude patterns.  rsync's
+manpage has more information on the formats these files should be in.
+
+I have included an example exclude patterns file (exclude.lst) that
+will exclude packages from a Mandriva mirror that are only of use to
+non-English speakers.  Thanks to Ron Stodden for this file.
+
+If you use include/exclude patterns to exclude packages, and there is
+some metadata stored within the distribution about the packages, that
+metadata may need to be regenerated.  There is an example (based on
+Mandriva Cooker) commented out at the bottom of the rpmsync script
+that gives an idea how you can handle this.
